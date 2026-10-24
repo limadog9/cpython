@@ -1,0 +1,4 @@
+Fix a race between concurrent calls on the same asynchronous generator
+:meth:`~agen.aclose` or :meth:`~agen.athrow` awaitable. A competing call could
+resume the generator instead of delivering the exception, or prevent an
+ongoing call from completing its cleanup.

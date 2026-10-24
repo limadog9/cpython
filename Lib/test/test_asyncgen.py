@@ -1,10 +1,13 @@
 import inspect
+import threading
 import traceback
 import types
 import unittest
 import contextlib
 import warnings
 
+from test import support
+from test.support import threading_helper
 from test.support.import_helper import import_module
 from test.support import gc_collect, requires_working_socket
 asyncio = import_module("asyncio")
@@ -539,6 +542,75 @@ class AsyncGenTest(unittest.TestCase):
         with self.assertRaisesRegex(RuntimeError,
                 r"cannot reuse already awaited aclose\(\)/athrow\(\)"):
             gen2.send(None)
+
+    @threading_helper.requires_working_threading()
+    def test_shared_athrow_preserves_running_call(self):
+        for method in ('aclose', 'athrow'):
+            for drive in ('send', 'throw'):
+                for competing in ('send', 'throw', 'close'):
+                    with self.subTest(method=method, drive=drive,
+                                      competing=competing):
+                        self.check_shared_athrow_running_call(
+                            method, drive, competing)
+
+    def check_shared_athrow_running_call(self, method, drive, competing):
+        entered = threading.Event()
+        release = threading.Event()
+        cleanups = []
+        results = []
+        marker = object()
+
+        @types.coroutine
+        def suspend():
+            yield marker
+
+        async def agen():
+            try:
+                yield 1
+            finally:
+                # Exercise both the initial call and a call resuming an await.
+                for _ in range(2):
+                    entered.set()
+                    self.assertTrue(release.wait(support.SHORT_TIMEOUT))
+                    await suspend()
+                cleanups.append(1)
+
+        ag = agen()
+        self.assertRaises(StopIteration, ag.asend(None).send, None)
+        exc = GeneratorExit if method == 'aclose' else ValueError
+        aw = ag.aclose() if method == 'aclose' else ag.athrow(exc)
+
+        def worker():
+            if drive == 'send':
+                results.append(aw.send(None))
+            else:
+                results.append(aw.throw(exc))
+
+        for step in range(2):
+            entered.clear()
+            release.clear()
+            thread = threading.Thread(target=worker)
+            with threading_helper.start_threads([thread], unlock=release.set):
+                self.assertTrue(entered.wait(support.SHORT_TIMEOUT))
+                with self.assertRaisesRegex(ValueError,
+                                            'async generator already executing'):
+                    if competing == 'send':
+                        aw.send(None)
+                    elif competing == 'throw':
+                        aw.throw(exc)
+                    else:
+                        aw.close()
+                # A rejected call must not release the generator or close aw.
+                self.assertTrue(ag.ag_running)
+            self.assertEqual(results, [marker] * (step + 1))
+            drive = 'send'
+
+        expected = StopIteration if method == 'aclose' else ValueError
+        self.assertRaises(expected, aw.send, None)
+        self.assertEqual(cleanups, [1])
+        self.assertFalse(ag.ag_running)
+        self.assertRaises(StopAsyncIteration, ag.asend(None).send, None)
+        self.assertRaises(RuntimeError, aw.send, None)
 
     def test_async_gen_3_arg_deprecation_warning(self):
         async def gen():
