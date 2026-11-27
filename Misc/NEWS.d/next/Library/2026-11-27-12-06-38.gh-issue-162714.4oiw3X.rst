@@ -1,0 +1,3 @@
+Omit the deprecated ``string`` alias from the signatures of :mod:`hashlib`
+constructors so that applying defaults with
+:meth:`inspect.BoundArguments.apply_defaults` produces a valid call.

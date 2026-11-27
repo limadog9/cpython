@@ -244,7 +244,7 @@ exit:
 #endif /* defined(PY_OPENSSL_HAS_SHAKE) */
 
 PyDoc_STRVAR(_hashlib_HASH_new__doc__,
-"new($module, /, name, data=b\'\', *, usedforsecurity=True, string=None)\n"
+"new($module, /, name, data=b\'\', *, usedforsecurity=True)\n"
 "--\n"
 "\n"
 "Return a new hash object using the named algorithm.\n"
@@ -259,7 +259,18 @@ PyDoc_STRVAR(_hashlib_HASH_new__doc__,
 
 static PyObject *
 _hashlib_HASH_new_impl(PyObject *module, const char *name, PyObject *data,
-                       int usedforsecurity, PyObject *string);
+                       int usedforsecurity);
+
+// Emit compiler warnings when we get to Python 3.19.
+#if PY_VERSION_HEX >= 0x031300C0
+#  error "Update the clinic input of '_hashlib.new'."
+#elif PY_VERSION_HEX >= 0x031300A0
+#  ifdef _MSC_VER
+#    pragma message ("Update the clinic input of '_hashlib.new'.")
+#  else
+#    warning "Update the clinic input of '_hashlib.new'."
+#  endif
+#endif
 
 static PyObject *
 _hashlib_HASH_new(PyObject *module, PyObject *const *args, Py_ssize_t nargs, PyObject *kwnames)
@@ -297,7 +308,6 @@ _hashlib_HASH_new(PyObject *module, PyObject *const *args, Py_ssize_t nargs, PyO
     const char *name;
     PyObject *data = NULL;
     int usedforsecurity = 1;
-    PyObject *string = NULL;
 
     args = _PyArg_UnpackKeywords(args, nargs, NULL, kwnames, &_parser,
             /*minpos*/ 1, /*maxpos*/ 2, /*minkw*/ 0, /*varpos*/ 0, argsbuf);
@@ -334,16 +344,28 @@ skip_optional_pos:
             goto skip_optional_kwonly;
         }
     }
-    string = args[3];
+    if (args[1]) {
+        PyErr_Format(PyExc_TypeError,
+                "argument for new() given by "
+                "name ('string') and %s", 1 < nargs ? "position (2)" : "name ('data')");
+        goto exit;
+    }
+    if (PyErr_WarnEx(PyExc_DeprecationWarning,
+            "Passing the argument 'string' to _hashlib.new() is deprecated. "
+            "Use 'data' instead. It will be removed in Python 3.19.", 1))
+    {
+        goto exit;
+    }
+    data = args[3];
 skip_optional_kwonly:
-    return_value = _hashlib_HASH_new_impl(module, name, data, usedforsecurity, string);
+    return_value = _hashlib_HASH_new_impl(module, name, data, usedforsecurity);
 
 exit:
     return return_value;
 }
 
 PyDoc_STRVAR(_hashlib_openssl_md5__doc__,
-"openssl_md5($module, /, data=b\'\', *, usedforsecurity=True, string=None)\n"
+"openssl_md5($module, /, data=b\'\', *, usedforsecurity=True)\n"
 "--\n"
 "\n"
 "Returns a md5 hash object; optionally initialized with a string");
@@ -353,7 +375,18 @@ PyDoc_STRVAR(_hashlib_openssl_md5__doc__,
 
 static PyObject *
 _hashlib_openssl_md5_impl(PyObject *module, PyObject *data,
-                          int usedforsecurity, PyObject *string);
+                          int usedforsecurity);
+
+// Emit compiler warnings when we get to Python 3.19.
+#if PY_VERSION_HEX >= 0x031300C0
+#  error "Update the clinic input of '_hashlib.openssl_md5'."
+#elif PY_VERSION_HEX >= 0x031300A0
+#  ifdef _MSC_VER
+#    pragma message ("Update the clinic input of '_hashlib.openssl_md5'.")
+#  else
+#    warning "Update the clinic input of '_hashlib.openssl_md5'."
+#  endif
+#endif
 
 static PyObject *
 _hashlib_openssl_md5(PyObject *module, PyObject *const *args, Py_ssize_t nargs, PyObject *kwnames)
@@ -390,7 +423,6 @@ _hashlib_openssl_md5(PyObject *module, PyObject *const *args, Py_ssize_t nargs, 
     Py_ssize_t noptargs = nargs + (kwnames ? PyTuple_GET_SIZE(kwnames) : 0) - 0;
     PyObject *data = NULL;
     int usedforsecurity = 1;
-    PyObject *string = NULL;
 
     args = _PyArg_UnpackKeywords(args, nargs, NULL, kwnames, &_parser,
             /*minpos*/ 0, /*maxpos*/ 1, /*minkw*/ 0, /*varpos*/ 0, argsbuf);
@@ -419,16 +451,29 @@ skip_optional_pos:
             goto skip_optional_kwonly;
         }
     }
-    string = args[2];
+    if (args[0]) {
+        PyErr_Format(PyExc_TypeError,
+                "argument for openssl_md5() given by "
+                "name ('string') and %s", 0 < nargs ? "position (1)" : "name ('data')");
+        goto exit;
+    }
+    if (PyErr_WarnEx(PyExc_DeprecationWarning,
+            "Passing the argument 'string' to _hashlib.openssl_md5() is "
+            "deprecated. Use 'data' instead. It will be removed in Python "
+            "3.19.", 1))
+    {
+        goto exit;
+    }
+    data = args[2];
 skip_optional_kwonly:
-    return_value = _hashlib_openssl_md5_impl(module, data, usedforsecurity, string);
+    return_value = _hashlib_openssl_md5_impl(module, data, usedforsecurity);
 
 exit:
     return return_value;
 }
 
 PyDoc_STRVAR(_hashlib_openssl_sha1__doc__,
-"openssl_sha1($module, /, data=b\'\', *, usedforsecurity=True, string=None)\n"
+"openssl_sha1($module, /, data=b\'\', *, usedforsecurity=True)\n"
 "--\n"
 "\n"
 "Returns a sha1 hash object; optionally initialized with a string");
@@ -438,7 +483,18 @@ PyDoc_STRVAR(_hashlib_openssl_sha1__doc__,
 
 static PyObject *
 _hashlib_openssl_sha1_impl(PyObject *module, PyObject *data,
-                           int usedforsecurity, PyObject *string);
+                           int usedforsecurity);
+
+// Emit compiler warnings when we get to Python 3.19.
+#if PY_VERSION_HEX >= 0x031300C0
+#  error "Update the clinic input of '_hashlib.openssl_sha1'."
+#elif PY_VERSION_HEX >= 0x031300A0
+#  ifdef _MSC_VER
+#    pragma message ("Update the clinic input of '_hashlib.openssl_sha1'.")
+#  else
+#    warning "Update the clinic input of '_hashlib.openssl_sha1'."
+#  endif
+#endif
 
 static PyObject *
 _hashlib_openssl_sha1(PyObject *module, PyObject *const *args, Py_ssize_t nargs, PyObject *kwnames)
@@ -475,7 +531,6 @@ _hashlib_openssl_sha1(PyObject *module, PyObject *const *args, Py_ssize_t nargs,
     Py_ssize_t noptargs = nargs + (kwnames ? PyTuple_GET_SIZE(kwnames) : 0) - 0;
     PyObject *data = NULL;
     int usedforsecurity = 1;
-    PyObject *string = NULL;
 
     args = _PyArg_UnpackKeywords(args, nargs, NULL, kwnames, &_parser,
             /*minpos*/ 0, /*maxpos*/ 1, /*minkw*/ 0, /*varpos*/ 0, argsbuf);
@@ -504,17 +559,29 @@ skip_optional_pos:
             goto skip_optional_kwonly;
         }
     }
-    string = args[2];
+    if (args[0]) {
+        PyErr_Format(PyExc_TypeError,
+                "argument for openssl_sha1() given by "
+                "name ('string') and %s", 0 < nargs ? "position (1)" : "name ('data')");
+        goto exit;
+    }
+    if (PyErr_WarnEx(PyExc_DeprecationWarning,
+            "Passing the argument 'string' to _hashlib.openssl_sha1() is "
+            "deprecated. Use 'data' instead. It will be removed in Python "
+            "3.19.", 1))
+    {
+        goto exit;
+    }
+    data = args[2];
 skip_optional_kwonly:
-    return_value = _hashlib_openssl_sha1_impl(module, data, usedforsecurity, string);
+    return_value = _hashlib_openssl_sha1_impl(module, data, usedforsecurity);
 
 exit:
     return return_value;
 }
 
 PyDoc_STRVAR(_hashlib_openssl_sha224__doc__,
-"openssl_sha224($module, /, data=b\'\', *, usedforsecurity=True,\n"
-"               string=None)\n"
+"openssl_sha224($module, /, data=b\'\', *, usedforsecurity=True)\n"
 "--\n"
 "\n"
 "Returns a sha224 hash object; optionally initialized with a string");
@@ -524,7 +591,18 @@ PyDoc_STRVAR(_hashlib_openssl_sha224__doc__,
 
 static PyObject *
 _hashlib_openssl_sha224_impl(PyObject *module, PyObject *data,
-                             int usedforsecurity, PyObject *string);
+                             int usedforsecurity);
+
+// Emit compiler warnings when we get to Python 3.19.
+#if PY_VERSION_HEX >= 0x031300C0
+#  error "Update the clinic input of '_hashlib.openssl_sha224'."
+#elif PY_VERSION_HEX >= 0x031300A0
+#  ifdef _MSC_VER
+#    pragma message ("Update the clinic input of '_hashlib.openssl_sha224'.")
+#  else
+#    warning "Update the clinic input of '_hashlib.openssl_sha224'."
+#  endif
+#endif
 
 static PyObject *
 _hashlib_openssl_sha224(PyObject *module, PyObject *const *args, Py_ssize_t nargs, PyObject *kwnames)
@@ -561,7 +639,6 @@ _hashlib_openssl_sha224(PyObject *module, PyObject *const *args, Py_ssize_t narg
     Py_ssize_t noptargs = nargs + (kwnames ? PyTuple_GET_SIZE(kwnames) : 0) - 0;
     PyObject *data = NULL;
     int usedforsecurity = 1;
-    PyObject *string = NULL;
 
     args = _PyArg_UnpackKeywords(args, nargs, NULL, kwnames, &_parser,
             /*minpos*/ 0, /*maxpos*/ 1, /*minkw*/ 0, /*varpos*/ 0, argsbuf);
@@ -590,17 +667,29 @@ skip_optional_pos:
             goto skip_optional_kwonly;
         }
     }
-    string = args[2];
+    if (args[0]) {
+        PyErr_Format(PyExc_TypeError,
+                "argument for openssl_sha224() given by "
+                "name ('string') and %s", 0 < nargs ? "position (1)" : "name ('data')");
+        goto exit;
+    }
+    if (PyErr_WarnEx(PyExc_DeprecationWarning,
+            "Passing the argument 'string' to _hashlib.openssl_sha224() is "
+            "deprecated. Use 'data' instead. It will be removed in Python "
+            "3.19.", 1))
+    {
+        goto exit;
+    }
+    data = args[2];
 skip_optional_kwonly:
-    return_value = _hashlib_openssl_sha224_impl(module, data, usedforsecurity, string);
+    return_value = _hashlib_openssl_sha224_impl(module, data, usedforsecurity);
 
 exit:
     return return_value;
 }
 
 PyDoc_STRVAR(_hashlib_openssl_sha256__doc__,
-"openssl_sha256($module, /, data=b\'\', *, usedforsecurity=True,\n"
-"               string=None)\n"
+"openssl_sha256($module, /, data=b\'\', *, usedforsecurity=True)\n"
 "--\n"
 "\n"
 "Returns a sha256 hash object; optionally initialized with a string");
@@ -610,7 +699,18 @@ PyDoc_STRVAR(_hashlib_openssl_sha256__doc__,
 
 static PyObject *
 _hashlib_openssl_sha256_impl(PyObject *module, PyObject *data,
-                             int usedforsecurity, PyObject *string);
+                             int usedforsecurity);
+
+// Emit compiler warnings when we get to Python 3.19.
+#if PY_VERSION_HEX >= 0x031300C0
+#  error "Update the clinic input of '_hashlib.openssl_sha256'."
+#elif PY_VERSION_HEX >= 0x031300A0
+#  ifdef _MSC_VER
+#    pragma message ("Update the clinic input of '_hashlib.openssl_sha256'.")
+#  else
+#    warning "Update the clinic input of '_hashlib.openssl_sha256'."
+#  endif
+#endif
 
 static PyObject *
 _hashlib_openssl_sha256(PyObject *module, PyObject *const *args, Py_ssize_t nargs, PyObject *kwnames)
@@ -647,7 +747,6 @@ _hashlib_openssl_sha256(PyObject *module, PyObject *const *args, Py_ssize_t narg
     Py_ssize_t noptargs = nargs + (kwnames ? PyTuple_GET_SIZE(kwnames) : 0) - 0;
     PyObject *data = NULL;
     int usedforsecurity = 1;
-    PyObject *string = NULL;
 
     args = _PyArg_UnpackKeywords(args, nargs, NULL, kwnames, &_parser,
             /*minpos*/ 0, /*maxpos*/ 1, /*minkw*/ 0, /*varpos*/ 0, argsbuf);
@@ -676,17 +775,29 @@ skip_optional_pos:
             goto skip_optional_kwonly;
         }
     }
-    string = args[2];
+    if (args[0]) {
+        PyErr_Format(PyExc_TypeError,
+                "argument for openssl_sha256() given by "
+                "name ('string') and %s", 0 < nargs ? "position (1)" : "name ('data')");
+        goto exit;
+    }
+    if (PyErr_WarnEx(PyExc_DeprecationWarning,
+            "Passing the argument 'string' to _hashlib.openssl_sha256() is "
+            "deprecated. Use 'data' instead. It will be removed in Python "
+            "3.19.", 1))
+    {
+        goto exit;
+    }
+    data = args[2];
 skip_optional_kwonly:
-    return_value = _hashlib_openssl_sha256_impl(module, data, usedforsecurity, string);
+    return_value = _hashlib_openssl_sha256_impl(module, data, usedforsecurity);
 
 exit:
     return return_value;
 }
 
 PyDoc_STRVAR(_hashlib_openssl_sha384__doc__,
-"openssl_sha384($module, /, data=b\'\', *, usedforsecurity=True,\n"
-"               string=None)\n"
+"openssl_sha384($module, /, data=b\'\', *, usedforsecurity=True)\n"
 "--\n"
 "\n"
 "Returns a sha384 hash object; optionally initialized with a string");
@@ -696,7 +807,18 @@ PyDoc_STRVAR(_hashlib_openssl_sha384__doc__,
 
 static PyObject *
 _hashlib_openssl_sha384_impl(PyObject *module, PyObject *data,
-                             int usedforsecurity, PyObject *string);
+                             int usedforsecurity);
+
+// Emit compiler warnings when we get to Python 3.19.
+#if PY_VERSION_HEX >= 0x031300C0
+#  error "Update the clinic input of '_hashlib.openssl_sha384'."
+#elif PY_VERSION_HEX >= 0x031300A0
+#  ifdef _MSC_VER
+#    pragma message ("Update the clinic input of '_hashlib.openssl_sha384'.")
+#  else
+#    warning "Update the clinic input of '_hashlib.openssl_sha384'."
+#  endif
+#endif
 
 static PyObject *
 _hashlib_openssl_sha384(PyObject *module, PyObject *const *args, Py_ssize_t nargs, PyObject *kwnames)
@@ -733,7 +855,6 @@ _hashlib_openssl_sha384(PyObject *module, PyObject *const *args, Py_ssize_t narg
     Py_ssize_t noptargs = nargs + (kwnames ? PyTuple_GET_SIZE(kwnames) : 0) - 0;
     PyObject *data = NULL;
     int usedforsecurity = 1;
-    PyObject *string = NULL;
 
     args = _PyArg_UnpackKeywords(args, nargs, NULL, kwnames, &_parser,
             /*minpos*/ 0, /*maxpos*/ 1, /*minkw*/ 0, /*varpos*/ 0, argsbuf);
@@ -762,17 +883,29 @@ skip_optional_pos:
             goto skip_optional_kwonly;
         }
     }
-    string = args[2];
+    if (args[0]) {
+        PyErr_Format(PyExc_TypeError,
+                "argument for openssl_sha384() given by "
+                "name ('string') and %s", 0 < nargs ? "position (1)" : "name ('data')");
+        goto exit;
+    }
+    if (PyErr_WarnEx(PyExc_DeprecationWarning,
+            "Passing the argument 'string' to _hashlib.openssl_sha384() is "
+            "deprecated. Use 'data' instead. It will be removed in Python "
+            "3.19.", 1))
+    {
+        goto exit;
+    }
+    data = args[2];
 skip_optional_kwonly:
-    return_value = _hashlib_openssl_sha384_impl(module, data, usedforsecurity, string);
+    return_value = _hashlib_openssl_sha384_impl(module, data, usedforsecurity);
 
 exit:
     return return_value;
 }
 
 PyDoc_STRVAR(_hashlib_openssl_sha512__doc__,
-"openssl_sha512($module, /, data=b\'\', *, usedforsecurity=True,\n"
-"               string=None)\n"
+"openssl_sha512($module, /, data=b\'\', *, usedforsecurity=True)\n"
 "--\n"
 "\n"
 "Returns a sha512 hash object; optionally initialized with a string");
@@ -782,7 +915,18 @@ PyDoc_STRVAR(_hashlib_openssl_sha512__doc__,
 
 static PyObject *
 _hashlib_openssl_sha512_impl(PyObject *module, PyObject *data,
-                             int usedforsecurity, PyObject *string);
+                             int usedforsecurity);
+
+// Emit compiler warnings when we get to Python 3.19.
+#if PY_VERSION_HEX >= 0x031300C0
+#  error "Update the clinic input of '_hashlib.openssl_sha512'."
+#elif PY_VERSION_HEX >= 0x031300A0
+#  ifdef _MSC_VER
+#    pragma message ("Update the clinic input of '_hashlib.openssl_sha512'.")
+#  else
+#    warning "Update the clinic input of '_hashlib.openssl_sha512'."
+#  endif
+#endif
 
 static PyObject *
 _hashlib_openssl_sha512(PyObject *module, PyObject *const *args, Py_ssize_t nargs, PyObject *kwnames)
@@ -819,7 +963,6 @@ _hashlib_openssl_sha512(PyObject *module, PyObject *const *args, Py_ssize_t narg
     Py_ssize_t noptargs = nargs + (kwnames ? PyTuple_GET_SIZE(kwnames) : 0) - 0;
     PyObject *data = NULL;
     int usedforsecurity = 1;
-    PyObject *string = NULL;
 
     args = _PyArg_UnpackKeywords(args, nargs, NULL, kwnames, &_parser,
             /*minpos*/ 0, /*maxpos*/ 1, /*minkw*/ 0, /*varpos*/ 0, argsbuf);
@@ -848,9 +991,22 @@ skip_optional_pos:
             goto skip_optional_kwonly;
         }
     }
-    string = args[2];
+    if (args[0]) {
+        PyErr_Format(PyExc_TypeError,
+                "argument for openssl_sha512() given by "
+                "name ('string') and %s", 0 < nargs ? "position (1)" : "name ('data')");
+        goto exit;
+    }
+    if (PyErr_WarnEx(PyExc_DeprecationWarning,
+            "Passing the argument 'string' to _hashlib.openssl_sha512() is "
+            "deprecated. Use 'data' instead. It will be removed in Python "
+            "3.19.", 1))
+    {
+        goto exit;
+    }
+    data = args[2];
 skip_optional_kwonly:
-    return_value = _hashlib_openssl_sha512_impl(module, data, usedforsecurity, string);
+    return_value = _hashlib_openssl_sha512_impl(module, data, usedforsecurity);
 
 exit:
     return return_value;
@@ -859,8 +1015,7 @@ exit:
 #if defined(PY_OPENSSL_HAS_SHA3)
 
 PyDoc_STRVAR(_hashlib_openssl_sha3_224__doc__,
-"openssl_sha3_224($module, /, data=b\'\', *, usedforsecurity=True,\n"
-"                 string=None)\n"
+"openssl_sha3_224($module, /, data=b\'\', *, usedforsecurity=True)\n"
 "--\n"
 "\n"
 "Returns a sha3-224 hash object; optionally initialized with a string");
@@ -870,7 +1025,18 @@ PyDoc_STRVAR(_hashlib_openssl_sha3_224__doc__,
 
 static PyObject *
 _hashlib_openssl_sha3_224_impl(PyObject *module, PyObject *data,
-                               int usedforsecurity, PyObject *string);
+                               int usedforsecurity);
+
+// Emit compiler warnings when we get to Python 3.19.
+#if PY_VERSION_HEX >= 0x031300C0
+#  error "Update the clinic input of '_hashlib.openssl_sha3_224'."
+#elif PY_VERSION_HEX >= 0x031300A0
+#  ifdef _MSC_VER
+#    pragma message ("Update the clinic input of '_hashlib.openssl_sha3_224'.")
+#  else
+#    warning "Update the clinic input of '_hashlib.openssl_sha3_224'."
+#  endif
+#endif
 
 static PyObject *
 _hashlib_openssl_sha3_224(PyObject *module, PyObject *const *args, Py_ssize_t nargs, PyObject *kwnames)
@@ -907,7 +1073,6 @@ _hashlib_openssl_sha3_224(PyObject *module, PyObject *const *args, Py_ssize_t na
     Py_ssize_t noptargs = nargs + (kwnames ? PyTuple_GET_SIZE(kwnames) : 0) - 0;
     PyObject *data = NULL;
     int usedforsecurity = 1;
-    PyObject *string = NULL;
 
     args = _PyArg_UnpackKeywords(args, nargs, NULL, kwnames, &_parser,
             /*minpos*/ 0, /*maxpos*/ 1, /*minkw*/ 0, /*varpos*/ 0, argsbuf);
@@ -936,9 +1101,22 @@ skip_optional_pos:
             goto skip_optional_kwonly;
         }
     }
-    string = args[2];
+    if (args[0]) {
+        PyErr_Format(PyExc_TypeError,
+                "argument for openssl_sha3_224() given by "
+                "name ('string') and %s", 0 < nargs ? "position (1)" : "name ('data')");
+        goto exit;
+    }
+    if (PyErr_WarnEx(PyExc_DeprecationWarning,
+            "Passing the argument 'string' to _hashlib.openssl_sha3_224() is "
+            "deprecated. Use 'data' instead. It will be removed in Python "
+            "3.19.", 1))
+    {
+        goto exit;
+    }
+    data = args[2];
 skip_optional_kwonly:
-    return_value = _hashlib_openssl_sha3_224_impl(module, data, usedforsecurity, string);
+    return_value = _hashlib_openssl_sha3_224_impl(module, data, usedforsecurity);
 
 exit:
     return return_value;
@@ -949,8 +1127,7 @@ exit:
 #if defined(PY_OPENSSL_HAS_SHA3)
 
 PyDoc_STRVAR(_hashlib_openssl_sha3_256__doc__,
-"openssl_sha3_256($module, /, data=b\'\', *, usedforsecurity=True,\n"
-"                 string=None)\n"
+"openssl_sha3_256($module, /, data=b\'\', *, usedforsecurity=True)\n"
 "--\n"
 "\n"
 "Returns a sha3-256 hash object; optionally initialized with a string");
@@ -960,7 +1137,18 @@ PyDoc_STRVAR(_hashlib_openssl_sha3_256__doc__,
 
 static PyObject *
 _hashlib_openssl_sha3_256_impl(PyObject *module, PyObject *data,
-                               int usedforsecurity, PyObject *string);
+                               int usedforsecurity);
+
+// Emit compiler warnings when we get to Python 3.19.
+#if PY_VERSION_HEX >= 0x031300C0
+#  error "Update the clinic input of '_hashlib.openssl_sha3_256'."
+#elif PY_VERSION_HEX >= 0x031300A0
+#  ifdef _MSC_VER
+#    pragma message ("Update the clinic input of '_hashlib.openssl_sha3_256'.")
+#  else
+#    warning "Update the clinic input of '_hashlib.openssl_sha3_256'."
+#  endif
+#endif
 
 static PyObject *
 _hashlib_openssl_sha3_256(PyObject *module, PyObject *const *args, Py_ssize_t nargs, PyObject *kwnames)
@@ -997,7 +1185,6 @@ _hashlib_openssl_sha3_256(PyObject *module, PyObject *const *args, Py_ssize_t na
     Py_ssize_t noptargs = nargs + (kwnames ? PyTuple_GET_SIZE(kwnames) : 0) - 0;
     PyObject *data = NULL;
     int usedforsecurity = 1;
-    PyObject *string = NULL;
 
     args = _PyArg_UnpackKeywords(args, nargs, NULL, kwnames, &_parser,
             /*minpos*/ 0, /*maxpos*/ 1, /*minkw*/ 0, /*varpos*/ 0, argsbuf);
@@ -1026,9 +1213,22 @@ skip_optional_pos:
             goto skip_optional_kwonly;
         }
     }
-    string = args[2];
+    if (args[0]) {
+        PyErr_Format(PyExc_TypeError,
+                "argument for openssl_sha3_256() given by "
+                "name ('string') and %s", 0 < nargs ? "position (1)" : "name ('data')");
+        goto exit;
+    }
+    if (PyErr_WarnEx(PyExc_DeprecationWarning,
+            "Passing the argument 'string' to _hashlib.openssl_sha3_256() is "
+            "deprecated. Use 'data' instead. It will be removed in Python "
+            "3.19.", 1))
+    {
+        goto exit;
+    }
+    data = args[2];
 skip_optional_kwonly:
-    return_value = _hashlib_openssl_sha3_256_impl(module, data, usedforsecurity, string);
+    return_value = _hashlib_openssl_sha3_256_impl(module, data, usedforsecurity);
 
 exit:
     return return_value;
@@ -1039,8 +1239,7 @@ exit:
 #if defined(PY_OPENSSL_HAS_SHA3)
 
 PyDoc_STRVAR(_hashlib_openssl_sha3_384__doc__,
-"openssl_sha3_384($module, /, data=b\'\', *, usedforsecurity=True,\n"
-"                 string=None)\n"
+"openssl_sha3_384($module, /, data=b\'\', *, usedforsecurity=True)\n"
 "--\n"
 "\n"
 "Returns a sha3-384 hash object; optionally initialized with a string");
@@ -1050,7 +1249,18 @@ PyDoc_STRVAR(_hashlib_openssl_sha3_384__doc__,
 
 static PyObject *
 _hashlib_openssl_sha3_384_impl(PyObject *module, PyObject *data,
-                               int usedforsecurity, PyObject *string);
+                               int usedforsecurity);
+
+// Emit compiler warnings when we get to Python 3.19.
+#if PY_VERSION_HEX >= 0x031300C0
+#  error "Update the clinic input of '_hashlib.openssl_sha3_384'."
+#elif PY_VERSION_HEX >= 0x031300A0
+#  ifdef _MSC_VER
+#    pragma message ("Update the clinic input of '_hashlib.openssl_sha3_384'.")
+#  else
+#    warning "Update the clinic input of '_hashlib.openssl_sha3_384'."
+#  endif
+#endif
 
 static PyObject *
 _hashlib_openssl_sha3_384(PyObject *module, PyObject *const *args, Py_ssize_t nargs, PyObject *kwnames)
@@ -1087,7 +1297,6 @@ _hashlib_openssl_sha3_384(PyObject *module, PyObject *const *args, Py_ssize_t na
     Py_ssize_t noptargs = nargs + (kwnames ? PyTuple_GET_SIZE(kwnames) : 0) - 0;
     PyObject *data = NULL;
     int usedforsecurity = 1;
-    PyObject *string = NULL;
 
     args = _PyArg_UnpackKeywords(args, nargs, NULL, kwnames, &_parser,
             /*minpos*/ 0, /*maxpos*/ 1, /*minkw*/ 0, /*varpos*/ 0, argsbuf);
@@ -1116,9 +1325,22 @@ skip_optional_pos:
             goto skip_optional_kwonly;
         }
     }
-    string = args[2];
+    if (args[0]) {
+        PyErr_Format(PyExc_TypeError,
+                "argument for openssl_sha3_384() given by "
+                "name ('string') and %s", 0 < nargs ? "position (1)" : "name ('data')");
+        goto exit;
+    }
+    if (PyErr_WarnEx(PyExc_DeprecationWarning,
+            "Passing the argument 'string' to _hashlib.openssl_sha3_384() is "
+            "deprecated. Use 'data' instead. It will be removed in Python "
+            "3.19.", 1))
+    {
+        goto exit;
+    }
+    data = args[2];
 skip_optional_kwonly:
-    return_value = _hashlib_openssl_sha3_384_impl(module, data, usedforsecurity, string);
+    return_value = _hashlib_openssl_sha3_384_impl(module, data, usedforsecurity);
 
 exit:
     return return_value;
@@ -1129,8 +1351,7 @@ exit:
 #if defined(PY_OPENSSL_HAS_SHA3)
 
 PyDoc_STRVAR(_hashlib_openssl_sha3_512__doc__,
-"openssl_sha3_512($module, /, data=b\'\', *, usedforsecurity=True,\n"
-"                 string=None)\n"
+"openssl_sha3_512($module, /, data=b\'\', *, usedforsecurity=True)\n"
 "--\n"
 "\n"
 "Returns a sha3-512 hash object; optionally initialized with a string");
@@ -1140,7 +1361,18 @@ PyDoc_STRVAR(_hashlib_openssl_sha3_512__doc__,
 
 static PyObject *
 _hashlib_openssl_sha3_512_impl(PyObject *module, PyObject *data,
-                               int usedforsecurity, PyObject *string);
+                               int usedforsecurity);
+
+// Emit compiler warnings when we get to Python 3.19.
+#if PY_VERSION_HEX >= 0x031300C0
+#  error "Update the clinic input of '_hashlib.openssl_sha3_512'."
+#elif PY_VERSION_HEX >= 0x031300A0
+#  ifdef _MSC_VER
+#    pragma message ("Update the clinic input of '_hashlib.openssl_sha3_512'.")
+#  else
+#    warning "Update the clinic input of '_hashlib.openssl_sha3_512'."
+#  endif
+#endif
 
 static PyObject *
 _hashlib_openssl_sha3_512(PyObject *module, PyObject *const *args, Py_ssize_t nargs, PyObject *kwnames)
@@ -1177,7 +1409,6 @@ _hashlib_openssl_sha3_512(PyObject *module, PyObject *const *args, Py_ssize_t na
     Py_ssize_t noptargs = nargs + (kwnames ? PyTuple_GET_SIZE(kwnames) : 0) - 0;
     PyObject *data = NULL;
     int usedforsecurity = 1;
-    PyObject *string = NULL;
 
     args = _PyArg_UnpackKeywords(args, nargs, NULL, kwnames, &_parser,
             /*minpos*/ 0, /*maxpos*/ 1, /*minkw*/ 0, /*varpos*/ 0, argsbuf);
@@ -1206,9 +1437,22 @@ skip_optional_pos:
             goto skip_optional_kwonly;
         }
     }
-    string = args[2];
+    if (args[0]) {
+        PyErr_Format(PyExc_TypeError,
+                "argument for openssl_sha3_512() given by "
+                "name ('string') and %s", 0 < nargs ? "position (1)" : "name ('data')");
+        goto exit;
+    }
+    if (PyErr_WarnEx(PyExc_DeprecationWarning,
+            "Passing the argument 'string' to _hashlib.openssl_sha3_512() is "
+            "deprecated. Use 'data' instead. It will be removed in Python "
+            "3.19.", 1))
+    {
+        goto exit;
+    }
+    data = args[2];
 skip_optional_kwonly:
-    return_value = _hashlib_openssl_sha3_512_impl(module, data, usedforsecurity, string);
+    return_value = _hashlib_openssl_sha3_512_impl(module, data, usedforsecurity);
 
 exit:
     return return_value;
@@ -1219,8 +1463,7 @@ exit:
 #if defined(PY_OPENSSL_HAS_SHAKE)
 
 PyDoc_STRVAR(_hashlib_openssl_shake_128__doc__,
-"openssl_shake_128($module, /, data=b\'\', *, usedforsecurity=True,\n"
-"                  string=None)\n"
+"openssl_shake_128($module, /, data=b\'\', *, usedforsecurity=True)\n"
 "--\n"
 "\n"
 "Returns a shake-128 variable hash object; optionally initialized with a string");
@@ -1230,7 +1473,18 @@ PyDoc_STRVAR(_hashlib_openssl_shake_128__doc__,
 
 static PyObject *
 _hashlib_openssl_shake_128_impl(PyObject *module, PyObject *data,
-                                int usedforsecurity, PyObject *string);
+                                int usedforsecurity);
+
+// Emit compiler warnings when we get to Python 3.19.
+#if PY_VERSION_HEX >= 0x031300C0
+#  error "Update the clinic input of '_hashlib.openssl_shake_128'."
+#elif PY_VERSION_HEX >= 0x031300A0
+#  ifdef _MSC_VER
+#    pragma message ("Update the clinic input of '_hashlib.openssl_shake_128'.")
+#  else
+#    warning "Update the clinic input of '_hashlib.openssl_shake_128'."
+#  endif
+#endif
 
 static PyObject *
 _hashlib_openssl_shake_128(PyObject *module, PyObject *const *args, Py_ssize_t nargs, PyObject *kwnames)
@@ -1267,7 +1521,6 @@ _hashlib_openssl_shake_128(PyObject *module, PyObject *const *args, Py_ssize_t n
     Py_ssize_t noptargs = nargs + (kwnames ? PyTuple_GET_SIZE(kwnames) : 0) - 0;
     PyObject *data = NULL;
     int usedforsecurity = 1;
-    PyObject *string = NULL;
 
     args = _PyArg_UnpackKeywords(args, nargs, NULL, kwnames, &_parser,
             /*minpos*/ 0, /*maxpos*/ 1, /*minkw*/ 0, /*varpos*/ 0, argsbuf);
@@ -1296,9 +1549,22 @@ skip_optional_pos:
             goto skip_optional_kwonly;
         }
     }
-    string = args[2];
+    if (args[0]) {
+        PyErr_Format(PyExc_TypeError,
+                "argument for openssl_shake_128() given by "
+                "name ('string') and %s", 0 < nargs ? "position (1)" : "name ('data')");
+        goto exit;
+    }
+    if (PyErr_WarnEx(PyExc_DeprecationWarning,
+            "Passing the argument 'string' to _hashlib.openssl_shake_128() is"
+            " deprecated. Use 'data' instead. It will be removed in Python "
+            "3.19.", 1))
+    {
+        goto exit;
+    }
+    data = args[2];
 skip_optional_kwonly:
-    return_value = _hashlib_openssl_shake_128_impl(module, data, usedforsecurity, string);
+    return_value = _hashlib_openssl_shake_128_impl(module, data, usedforsecurity);
 
 exit:
     return return_value;
@@ -1309,8 +1575,7 @@ exit:
 #if defined(PY_OPENSSL_HAS_SHAKE)
 
 PyDoc_STRVAR(_hashlib_openssl_shake_256__doc__,
-"openssl_shake_256($module, /, data=b\'\', *, usedforsecurity=True,\n"
-"                  string=None)\n"
+"openssl_shake_256($module, /, data=b\'\', *, usedforsecurity=True)\n"
 "--\n"
 "\n"
 "Returns a shake-256 variable hash object; optionally initialized with a string");
@@ -1320,7 +1585,18 @@ PyDoc_STRVAR(_hashlib_openssl_shake_256__doc__,
 
 static PyObject *
 _hashlib_openssl_shake_256_impl(PyObject *module, PyObject *data,
-                                int usedforsecurity, PyObject *string);
+                                int usedforsecurity);
+
+// Emit compiler warnings when we get to Python 3.19.
+#if PY_VERSION_HEX >= 0x031300C0
+#  error "Update the clinic input of '_hashlib.openssl_shake_256'."
+#elif PY_VERSION_HEX >= 0x031300A0
+#  ifdef _MSC_VER
+#    pragma message ("Update the clinic input of '_hashlib.openssl_shake_256'.")
+#  else
+#    warning "Update the clinic input of '_hashlib.openssl_shake_256'."
+#  endif
+#endif
 
 static PyObject *
 _hashlib_openssl_shake_256(PyObject *module, PyObject *const *args, Py_ssize_t nargs, PyObject *kwnames)
@@ -1357,7 +1633,6 @@ _hashlib_openssl_shake_256(PyObject *module, PyObject *const *args, Py_ssize_t n
     Py_ssize_t noptargs = nargs + (kwnames ? PyTuple_GET_SIZE(kwnames) : 0) - 0;
     PyObject *data = NULL;
     int usedforsecurity = 1;
-    PyObject *string = NULL;
 
     args = _PyArg_UnpackKeywords(args, nargs, NULL, kwnames, &_parser,
             /*minpos*/ 0, /*maxpos*/ 1, /*minkw*/ 0, /*varpos*/ 0, argsbuf);
@@ -1386,9 +1661,22 @@ skip_optional_pos:
             goto skip_optional_kwonly;
         }
     }
-    string = args[2];
+    if (args[0]) {
+        PyErr_Format(PyExc_TypeError,
+                "argument for openssl_shake_256() given by "
+                "name ('string') and %s", 0 < nargs ? "position (1)" : "name ('data')");
+        goto exit;
+    }
+    if (PyErr_WarnEx(PyExc_DeprecationWarning,
+            "Passing the argument 'string' to _hashlib.openssl_shake_256() is"
+            " deprecated. Use 'data' instead. It will be removed in Python "
+            "3.19.", 1))
+    {
+        goto exit;
+    }
+    data = args[2];
 skip_optional_kwonly:
-    return_value = _hashlib_openssl_shake_256_impl(module, data, usedforsecurity, string);
+    return_value = _hashlib_openssl_shake_256_impl(module, data, usedforsecurity);
 
 exit:
     return return_value;
@@ -1977,4 +2265,4 @@ exit:
 #ifndef _HASHLIB_OPENSSL_SHAKE_256_METHODDEF
     #define _HASHLIB_OPENSSL_SHAKE_256_METHODDEF
 #endif /* !defined(_HASHLIB_OPENSSL_SHAKE_256_METHODDEF) */
-/*[clinic end generated code: output=608e8ac9483c9173 input=a9049054013a1b77]*/
+/*[clinic end generated code: output=bda0a7235dfddbb6 input=a9049054013a1b77]*/

@@ -89,7 +89,7 @@ SHA1Type_update(PyObject *self, PyObject *obj)
 }
 
 PyDoc_STRVAR(_sha1_sha1__doc__,
-"sha1($module, /, data=b\'\', *, usedforsecurity=True, string=None)\n"
+"sha1($module, /, data=b\'\', *, usedforsecurity=True)\n"
 "--\n"
 "\n"
 "Return a new SHA1 hash object; optionally initialized with a string.");
@@ -98,8 +98,18 @@ PyDoc_STRVAR(_sha1_sha1__doc__,
     {"sha1", _PyCFunction_CAST(_sha1_sha1), METH_FASTCALL|METH_KEYWORDS, _sha1_sha1__doc__},
 
 static PyObject *
-_sha1_sha1_impl(PyObject *module, PyObject *data, int usedforsecurity,
-                PyObject *string_obj);
+_sha1_sha1_impl(PyObject *module, PyObject *data, int usedforsecurity);
+
+// Emit compiler warnings when we get to Python 3.19.
+#if PY_VERSION_HEX >= 0x031300C0
+#  error "Update the clinic input of '_sha1.sha1'."
+#elif PY_VERSION_HEX >= 0x031300A0
+#  ifdef _MSC_VER
+#    pragma message ("Update the clinic input of '_sha1.sha1'.")
+#  else
+#    warning "Update the clinic input of '_sha1.sha1'."
+#  endif
+#endif
 
 static PyObject *
 _sha1_sha1(PyObject *module, PyObject *const *args, Py_ssize_t nargs, PyObject *kwnames)
@@ -136,7 +146,6 @@ _sha1_sha1(PyObject *module, PyObject *const *args, Py_ssize_t nargs, PyObject *
     Py_ssize_t noptargs = nargs + (kwnames ? PyTuple_GET_SIZE(kwnames) : 0) - 0;
     PyObject *data = NULL;
     int usedforsecurity = 1;
-    PyObject *string_obj = NULL;
 
     args = _PyArg_UnpackKeywords(args, nargs, NULL, kwnames, &_parser,
             /*minpos*/ 0, /*maxpos*/ 1, /*minkw*/ 0, /*varpos*/ 0, argsbuf);
@@ -165,11 +174,23 @@ skip_optional_pos:
             goto skip_optional_kwonly;
         }
     }
-    string_obj = args[2];
+    if (args[0]) {
+        PyErr_Format(PyExc_TypeError,
+                "argument for sha1() given by "
+                "name ('string') and %s", 0 < nargs ? "position (1)" : "name ('data')");
+        goto exit;
+    }
+    if (PyErr_WarnEx(PyExc_DeprecationWarning,
+            "Passing the argument 'string' to _sha1.sha1() is deprecated. Use"
+            " 'data' instead. It will be removed in Python 3.19.", 1))
+    {
+        goto exit;
+    }
+    data = args[2];
 skip_optional_kwonly:
-    return_value = _sha1_sha1_impl(module, data, usedforsecurity, string_obj);
+    return_value = _sha1_sha1_impl(module, data, usedforsecurity);
 
 exit:
     return return_value;
 }
-/*[clinic end generated code: output=fd5a917404b68c4f input=a9049054013a1b77]*/
+/*[clinic end generated code: output=331489e1de6de51e input=a9049054013a1b77]*/

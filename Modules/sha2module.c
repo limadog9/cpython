@@ -568,31 +568,26 @@ _sha2.sha256
     data: object(c_default="NULL") = b''
     *
     usedforsecurity: bool = True
-    string as string_obj: object(c_default="NULL") = None
+    [until 3.19] string as data: object = None
 
 Return a new SHA-256 hash object; optionally initialized with a string.
 [clinic start generated code]*/
 
 static PyObject *
-_sha2_sha256_impl(PyObject *module, PyObject *data, int usedforsecurity,
-                  PyObject *string_obj)
-/*[clinic end generated code: output=49828a7bcd418f45 input=9ce1d70e669abc14]*/
+_sha2_sha256_impl(PyObject *module, PyObject *data, int usedforsecurity)
+/*[clinic end generated code: output=6812324bddc73c67 input=29137e6b06771ab7]*/
 {
     Py_buffer buf;
-    PyObject *string;
-    if (_Py_hashlib_data_argument(&string, data, string_obj) < 0) {
-        return NULL;
-    }
 
-    if (string) {
-        GET_BUFFER_VIEW_OR_ERROUT(string, &buf);
+    if (data) {
+        GET_BUFFER_VIEW_OR_ERROUT(data, &buf);
     }
 
     sha2_state *state = sha2_get_state(module);
 
     SHA256object *new;
     if ((new = newSHA256object(state)) == NULL) {
-        if (string) {
+        if (data) {
             PyBuffer_Release(&buf);
         }
         return NULL;
@@ -603,12 +598,12 @@ _sha2_sha256_impl(PyObject *module, PyObject *data, int usedforsecurity,
 
     if (new->state == NULL) {
         Py_DECREF(new);
-        if (string) {
+        if (data) {
             PyBuffer_Release(&buf);
         }
         return PyErr_NoMemory();
     }
-    if (string) {
+    if (data) {
         /* Do not use self->mutex here as this is the constructor
          * where it is not yet possible to have concurrent access. */
         HASHLIB_EXTERNAL_INSTRUCTIONS_UNLOCKED(
@@ -627,30 +622,25 @@ _sha2.sha224
     data: object(c_default="NULL") = b''
     *
     usedforsecurity: bool = True
-    string as string_obj: object(c_default="NULL") = None
+    [until 3.19] string as data: object = None
 
 Return a new SHA-224 hash object; optionally initialized with a string.
 [clinic start generated code]*/
 
 static PyObject *
-_sha2_sha224_impl(PyObject *module, PyObject *data, int usedforsecurity,
-                  PyObject *string_obj)
-/*[clinic end generated code: output=2163cb03b6cf6157 input=612f7682a889bc2a]*/
+_sha2_sha224_impl(PyObject *module, PyObject *data, int usedforsecurity)
+/*[clinic end generated code: output=10c665b93a32cfb7 input=4fcc7f9879c72d58]*/
 {
     Py_buffer buf;
-    PyObject *string;
-    if (_Py_hashlib_data_argument(&string, data, string_obj) < 0) {
-        return NULL;
-    }
 
-    if (string) {
-        GET_BUFFER_VIEW_OR_ERROUT(string, &buf);
+    if (data) {
+        GET_BUFFER_VIEW_OR_ERROUT(data, &buf);
     }
 
     sha2_state *state = sha2_get_state(module);
     SHA256object *new;
     if ((new = newSHA224object(state)) == NULL) {
-        if (string) {
+        if (data) {
             PyBuffer_Release(&buf);
         }
         return NULL;
@@ -661,12 +651,12 @@ _sha2_sha224_impl(PyObject *module, PyObject *data, int usedforsecurity,
 
     if (new->state == NULL) {
         Py_DECREF(new);
-        if (string) {
+        if (data) {
             PyBuffer_Release(&buf);
         }
         return PyErr_NoMemory();
     }
-    if (string) {
+    if (data) {
         /* Do not use self->mutex here as this is the constructor
          * where it is not yet possible to have concurrent access. */
         HASHLIB_EXTERNAL_INSTRUCTIONS_UNLOCKED(
@@ -685,31 +675,26 @@ _sha2.sha512
     data: object(c_default="NULL") = b''
     *
     usedforsecurity: bool = True
-    string as string_obj: object(c_default="NULL") = None
+    [until 3.19] string as data: object = None
 
 Return a new SHA-512 hash object; optionally initialized with a string.
 [clinic start generated code]*/
 
 static PyObject *
-_sha2_sha512_impl(PyObject *module, PyObject *data, int usedforsecurity,
-                  PyObject *string_obj)
-/*[clinic end generated code: output=cc3fcfce001a4538 input=19c9f2c06d59563a]*/
+_sha2_sha512_impl(PyObject *module, PyObject *data, int usedforsecurity)
+/*[clinic end generated code: output=0ed64aa0507c1f98 input=de006184ecf6f8cc]*/
 {
     SHA512object *new;
     Py_buffer buf;
-    PyObject *string;
-    if (_Py_hashlib_data_argument(&string, data, string_obj) < 0) {
-        return NULL;
-    }
 
     sha2_state *state = sha2_get_state(module);
 
-    if (string) {
-        GET_BUFFER_VIEW_OR_ERROUT(string, &buf);
+    if (data) {
+        GET_BUFFER_VIEW_OR_ERROUT(data, &buf);
     }
 
     if ((new = newSHA512object(state)) == NULL) {
-        if (string) {
+        if (data) {
             PyBuffer_Release(&buf);
         }
         return NULL;
@@ -720,12 +705,12 @@ _sha2_sha512_impl(PyObject *module, PyObject *data, int usedforsecurity,
 
     if (new->state == NULL) {
         Py_DECREF(new);
-        if (string) {
+        if (data) {
             PyBuffer_Release(&buf);
         }
         return PyErr_NoMemory();
     }
-    if (string) {
+    if (data) {
         /* Do not use self->mutex here as this is the constructor
          * where it is not yet possible to have concurrent access. */
         HASHLIB_EXTERNAL_INSTRUCTIONS_UNLOCKED(
@@ -744,31 +729,26 @@ _sha2.sha384
     data: object(c_default="NULL") = b''
     *
     usedforsecurity: bool = True
-    string as string_obj: object(c_default="NULL") = None
+    [until 3.19] string as data: object = None
 
 Return a new SHA-384 hash object; optionally initialized with a string.
 [clinic start generated code]*/
 
 static PyObject *
-_sha2_sha384_impl(PyObject *module, PyObject *data, int usedforsecurity,
-                  PyObject *string_obj)
-/*[clinic end generated code: output=b6e3db593b5a0330 input=9fd50c942ad9e0bf]*/
+_sha2_sha384_impl(PyObject *module, PyObject *data, int usedforsecurity)
+/*[clinic end generated code: output=e26a5d3dc964fb36 input=363ddeefbdf6e58d]*/
 {
     SHA512object *new;
     Py_buffer buf;
-    PyObject *string;
-    if (_Py_hashlib_data_argument(&string, data, string_obj) < 0) {
-        return NULL;
-    }
 
     sha2_state *state = sha2_get_state(module);
 
-    if (string) {
-        GET_BUFFER_VIEW_OR_ERROUT(string, &buf);
+    if (data) {
+        GET_BUFFER_VIEW_OR_ERROUT(data, &buf);
     }
 
     if ((new = newSHA384object(state)) == NULL) {
-        if (string) {
+        if (data) {
             PyBuffer_Release(&buf);
         }
         return NULL;
@@ -779,12 +759,12 @@ _sha2_sha384_impl(PyObject *module, PyObject *data, int usedforsecurity,
 
     if (new->state == NULL) {
         Py_DECREF(new);
-        if (string) {
+        if (data) {
             PyBuffer_Release(&buf);
         }
         return PyErr_NoMemory();
     }
-    if (string) {
+    if (data) {
         /* Do not use self->mutex here as this is the constructor
          * where it is not yet possible to have concurrent access. */
         HASHLIB_EXTERNAL_INSTRUCTIONS_UNLOCKED(

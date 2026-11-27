@@ -262,30 +262,25 @@ _sha1.sha1
     data: object(c_default="NULL") = b''
     *
     usedforsecurity: bool = True
-    string as string_obj: object(c_default="NULL") = None
+    [until 3.19] string as data: object = None
 
 Return a new SHA1 hash object; optionally initialized with a string.
 [clinic start generated code]*/
 
 static PyObject *
-_sha1_sha1_impl(PyObject *module, PyObject *data, int usedforsecurity,
-                PyObject *string_obj)
-/*[clinic end generated code: output=0d453775924f88a7 input=807f25264e0ac656]*/
+_sha1_sha1_impl(PyObject *module, PyObject *data, int usedforsecurity)
+/*[clinic end generated code: output=6ae050ee211b761c input=68f8a348fcb4aa8b]*/
 {
     SHA1object *new;
     Py_buffer buf;
-    PyObject *string;
-    if (_Py_hashlib_data_argument(&string, data, string_obj) < 0) {
-        return NULL;
-    }
 
-    if (string) {
-        GET_BUFFER_VIEW_OR_ERROUT(string, &buf);
+    if (data) {
+        GET_BUFFER_VIEW_OR_ERROUT(data, &buf);
     }
 
     SHA1State *st = sha1_get_state(module);
     if ((new = newSHA1object(st)) == NULL) {
-        if (string) {
+        if (data) {
             PyBuffer_Release(&buf);
         }
         return NULL;
@@ -295,12 +290,12 @@ _sha1_sha1_impl(PyObject *module, PyObject *data, int usedforsecurity,
 
     if (new->hash_state == NULL) {
         Py_DECREF(new);
-        if (string) {
+        if (data) {
             PyBuffer_Release(&buf);
         }
         return PyErr_NoMemory();
     }
-    if (string) {
+    if (data) {
         /* Do not use self->mutex here as this is the constructor
          * where it is not yet possible to have concurrent access. */
         HASHLIB_EXTERNAL_INSTRUCTIONS_UNLOCKED(

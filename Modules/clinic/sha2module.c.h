@@ -169,7 +169,7 @@ SHA512Type_update(PyObject *self, PyObject *obj)
 }
 
 PyDoc_STRVAR(_sha2_sha256__doc__,
-"sha256($module, /, data=b\'\', *, usedforsecurity=True, string=None)\n"
+"sha256($module, /, data=b\'\', *, usedforsecurity=True)\n"
 "--\n"
 "\n"
 "Return a new SHA-256 hash object; optionally initialized with a string.");
@@ -178,8 +178,18 @@ PyDoc_STRVAR(_sha2_sha256__doc__,
     {"sha256", _PyCFunction_CAST(_sha2_sha256), METH_FASTCALL|METH_KEYWORDS, _sha2_sha256__doc__},
 
 static PyObject *
-_sha2_sha256_impl(PyObject *module, PyObject *data, int usedforsecurity,
-                  PyObject *string_obj);
+_sha2_sha256_impl(PyObject *module, PyObject *data, int usedforsecurity);
+
+// Emit compiler warnings when we get to Python 3.19.
+#if PY_VERSION_HEX >= 0x031300C0
+#  error "Update the clinic input of '_sha2.sha256'."
+#elif PY_VERSION_HEX >= 0x031300A0
+#  ifdef _MSC_VER
+#    pragma message ("Update the clinic input of '_sha2.sha256'.")
+#  else
+#    warning "Update the clinic input of '_sha2.sha256'."
+#  endif
+#endif
 
 static PyObject *
 _sha2_sha256(PyObject *module, PyObject *const *args, Py_ssize_t nargs, PyObject *kwnames)
@@ -216,7 +226,6 @@ _sha2_sha256(PyObject *module, PyObject *const *args, Py_ssize_t nargs, PyObject
     Py_ssize_t noptargs = nargs + (kwnames ? PyTuple_GET_SIZE(kwnames) : 0) - 0;
     PyObject *data = NULL;
     int usedforsecurity = 1;
-    PyObject *string_obj = NULL;
 
     args = _PyArg_UnpackKeywords(args, nargs, NULL, kwnames, &_parser,
             /*minpos*/ 0, /*maxpos*/ 1, /*minkw*/ 0, /*varpos*/ 0, argsbuf);
@@ -245,16 +254,28 @@ skip_optional_pos:
             goto skip_optional_kwonly;
         }
     }
-    string_obj = args[2];
+    if (args[0]) {
+        PyErr_Format(PyExc_TypeError,
+                "argument for sha256() given by "
+                "name ('string') and %s", 0 < nargs ? "position (1)" : "name ('data')");
+        goto exit;
+    }
+    if (PyErr_WarnEx(PyExc_DeprecationWarning,
+            "Passing the argument 'string' to _sha2.sha256() is deprecated. "
+            "Use 'data' instead. It will be removed in Python 3.19.", 1))
+    {
+        goto exit;
+    }
+    data = args[2];
 skip_optional_kwonly:
-    return_value = _sha2_sha256_impl(module, data, usedforsecurity, string_obj);
+    return_value = _sha2_sha256_impl(module, data, usedforsecurity);
 
 exit:
     return return_value;
 }
 
 PyDoc_STRVAR(_sha2_sha224__doc__,
-"sha224($module, /, data=b\'\', *, usedforsecurity=True, string=None)\n"
+"sha224($module, /, data=b\'\', *, usedforsecurity=True)\n"
 "--\n"
 "\n"
 "Return a new SHA-224 hash object; optionally initialized with a string.");
@@ -263,8 +284,18 @@ PyDoc_STRVAR(_sha2_sha224__doc__,
     {"sha224", _PyCFunction_CAST(_sha2_sha224), METH_FASTCALL|METH_KEYWORDS, _sha2_sha224__doc__},
 
 static PyObject *
-_sha2_sha224_impl(PyObject *module, PyObject *data, int usedforsecurity,
-                  PyObject *string_obj);
+_sha2_sha224_impl(PyObject *module, PyObject *data, int usedforsecurity);
+
+// Emit compiler warnings when we get to Python 3.19.
+#if PY_VERSION_HEX >= 0x031300C0
+#  error "Update the clinic input of '_sha2.sha224'."
+#elif PY_VERSION_HEX >= 0x031300A0
+#  ifdef _MSC_VER
+#    pragma message ("Update the clinic input of '_sha2.sha224'.")
+#  else
+#    warning "Update the clinic input of '_sha2.sha224'."
+#  endif
+#endif
 
 static PyObject *
 _sha2_sha224(PyObject *module, PyObject *const *args, Py_ssize_t nargs, PyObject *kwnames)
@@ -301,7 +332,6 @@ _sha2_sha224(PyObject *module, PyObject *const *args, Py_ssize_t nargs, PyObject
     Py_ssize_t noptargs = nargs + (kwnames ? PyTuple_GET_SIZE(kwnames) : 0) - 0;
     PyObject *data = NULL;
     int usedforsecurity = 1;
-    PyObject *string_obj = NULL;
 
     args = _PyArg_UnpackKeywords(args, nargs, NULL, kwnames, &_parser,
             /*minpos*/ 0, /*maxpos*/ 1, /*minkw*/ 0, /*varpos*/ 0, argsbuf);
@@ -330,16 +360,28 @@ skip_optional_pos:
             goto skip_optional_kwonly;
         }
     }
-    string_obj = args[2];
+    if (args[0]) {
+        PyErr_Format(PyExc_TypeError,
+                "argument for sha224() given by "
+                "name ('string') and %s", 0 < nargs ? "position (1)" : "name ('data')");
+        goto exit;
+    }
+    if (PyErr_WarnEx(PyExc_DeprecationWarning,
+            "Passing the argument 'string' to _sha2.sha224() is deprecated. "
+            "Use 'data' instead. It will be removed in Python 3.19.", 1))
+    {
+        goto exit;
+    }
+    data = args[2];
 skip_optional_kwonly:
-    return_value = _sha2_sha224_impl(module, data, usedforsecurity, string_obj);
+    return_value = _sha2_sha224_impl(module, data, usedforsecurity);
 
 exit:
     return return_value;
 }
 
 PyDoc_STRVAR(_sha2_sha512__doc__,
-"sha512($module, /, data=b\'\', *, usedforsecurity=True, string=None)\n"
+"sha512($module, /, data=b\'\', *, usedforsecurity=True)\n"
 "--\n"
 "\n"
 "Return a new SHA-512 hash object; optionally initialized with a string.");
@@ -348,8 +390,18 @@ PyDoc_STRVAR(_sha2_sha512__doc__,
     {"sha512", _PyCFunction_CAST(_sha2_sha512), METH_FASTCALL|METH_KEYWORDS, _sha2_sha512__doc__},
 
 static PyObject *
-_sha2_sha512_impl(PyObject *module, PyObject *data, int usedforsecurity,
-                  PyObject *string_obj);
+_sha2_sha512_impl(PyObject *module, PyObject *data, int usedforsecurity);
+
+// Emit compiler warnings when we get to Python 3.19.
+#if PY_VERSION_HEX >= 0x031300C0
+#  error "Update the clinic input of '_sha2.sha512'."
+#elif PY_VERSION_HEX >= 0x031300A0
+#  ifdef _MSC_VER
+#    pragma message ("Update the clinic input of '_sha2.sha512'.")
+#  else
+#    warning "Update the clinic input of '_sha2.sha512'."
+#  endif
+#endif
 
 static PyObject *
 _sha2_sha512(PyObject *module, PyObject *const *args, Py_ssize_t nargs, PyObject *kwnames)
@@ -386,7 +438,6 @@ _sha2_sha512(PyObject *module, PyObject *const *args, Py_ssize_t nargs, PyObject
     Py_ssize_t noptargs = nargs + (kwnames ? PyTuple_GET_SIZE(kwnames) : 0) - 0;
     PyObject *data = NULL;
     int usedforsecurity = 1;
-    PyObject *string_obj = NULL;
 
     args = _PyArg_UnpackKeywords(args, nargs, NULL, kwnames, &_parser,
             /*minpos*/ 0, /*maxpos*/ 1, /*minkw*/ 0, /*varpos*/ 0, argsbuf);
@@ -415,16 +466,28 @@ skip_optional_pos:
             goto skip_optional_kwonly;
         }
     }
-    string_obj = args[2];
+    if (args[0]) {
+        PyErr_Format(PyExc_TypeError,
+                "argument for sha512() given by "
+                "name ('string') and %s", 0 < nargs ? "position (1)" : "name ('data')");
+        goto exit;
+    }
+    if (PyErr_WarnEx(PyExc_DeprecationWarning,
+            "Passing the argument 'string' to _sha2.sha512() is deprecated. "
+            "Use 'data' instead. It will be removed in Python 3.19.", 1))
+    {
+        goto exit;
+    }
+    data = args[2];
 skip_optional_kwonly:
-    return_value = _sha2_sha512_impl(module, data, usedforsecurity, string_obj);
+    return_value = _sha2_sha512_impl(module, data, usedforsecurity);
 
 exit:
     return return_value;
 }
 
 PyDoc_STRVAR(_sha2_sha384__doc__,
-"sha384($module, /, data=b\'\', *, usedforsecurity=True, string=None)\n"
+"sha384($module, /, data=b\'\', *, usedforsecurity=True)\n"
 "--\n"
 "\n"
 "Return a new SHA-384 hash object; optionally initialized with a string.");
@@ -433,8 +496,18 @@ PyDoc_STRVAR(_sha2_sha384__doc__,
     {"sha384", _PyCFunction_CAST(_sha2_sha384), METH_FASTCALL|METH_KEYWORDS, _sha2_sha384__doc__},
 
 static PyObject *
-_sha2_sha384_impl(PyObject *module, PyObject *data, int usedforsecurity,
-                  PyObject *string_obj);
+_sha2_sha384_impl(PyObject *module, PyObject *data, int usedforsecurity);
+
+// Emit compiler warnings when we get to Python 3.19.
+#if PY_VERSION_HEX >= 0x031300C0
+#  error "Update the clinic input of '_sha2.sha384'."
+#elif PY_VERSION_HEX >= 0x031300A0
+#  ifdef _MSC_VER
+#    pragma message ("Update the clinic input of '_sha2.sha384'.")
+#  else
+#    warning "Update the clinic input of '_sha2.sha384'."
+#  endif
+#endif
 
 static PyObject *
 _sha2_sha384(PyObject *module, PyObject *const *args, Py_ssize_t nargs, PyObject *kwnames)
@@ -471,7 +544,6 @@ _sha2_sha384(PyObject *module, PyObject *const *args, Py_ssize_t nargs, PyObject
     Py_ssize_t noptargs = nargs + (kwnames ? PyTuple_GET_SIZE(kwnames) : 0) - 0;
     PyObject *data = NULL;
     int usedforsecurity = 1;
-    PyObject *string_obj = NULL;
 
     args = _PyArg_UnpackKeywords(args, nargs, NULL, kwnames, &_parser,
             /*minpos*/ 0, /*maxpos*/ 1, /*minkw*/ 0, /*varpos*/ 0, argsbuf);
@@ -500,11 +572,23 @@ skip_optional_pos:
             goto skip_optional_kwonly;
         }
     }
-    string_obj = args[2];
+    if (args[0]) {
+        PyErr_Format(PyExc_TypeError,
+                "argument for sha384() given by "
+                "name ('string') and %s", 0 < nargs ? "position (1)" : "name ('data')");
+        goto exit;
+    }
+    if (PyErr_WarnEx(PyExc_DeprecationWarning,
+            "Passing the argument 'string' to _sha2.sha384() is deprecated. "
+            "Use 'data' instead. It will be removed in Python 3.19.", 1))
+    {
+        goto exit;
+    }
+    data = args[2];
 skip_optional_kwonly:
-    return_value = _sha2_sha384_impl(module, data, usedforsecurity, string_obj);
+    return_value = _sha2_sha384_impl(module, data, usedforsecurity);
 
 exit:
     return return_value;
 }
-/*[clinic end generated code: output=90625b237c774a9f input=a9049054013a1b77]*/
+/*[clinic end generated code: output=dfd21fd0fe665ad8 input=a9049054013a1b77]*/

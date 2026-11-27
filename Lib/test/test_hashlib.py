@@ -8,6 +8,7 @@ import array
 from binascii import unhexlify
 import hashlib
 import importlib
+import inspect
 import io
 import itertools
 import logging
@@ -117,7 +118,11 @@ def read_vectors(hash_name):
             yield parts
 
 
-DEPRECATED_STRING_PARAMETER = re.escape(
+DEPRECATED_STRING_PARAMETER = (
+    r"Passing the argument 'string' to .* is deprecated\. "
+    r"Use 'data' instead\. It will be removed in Python 3\.19\."
+)
+SHA3_DEPRECATED_STRING_PARAMETER = re.escape(
     "the 'string' keyword parameter is deprecated since "
     "Python 3.15 and slated for removal in Python 3.19; "
     "use the 'data' keyword parameter or pass the data "
@@ -289,42 +294,56 @@ class HashLibTestCase(unittest.TestCase):
             self._hashlib.new("md5", usedforsecurity=False)
             self._hashlib.openssl_md5(usedforsecurity=False)
 
+    @property
+    def clinic_constructors(self):
+        # hash_constructors includes the hashlib.new() wrapper for each name.
+        yield from self.hash_constructors
+        for name in self.constructors_to_test.keys() & openssl_md_meth_names:
+            yield partial(self._hashlib.new, name)
+
     @unittest.skipIf(get_fips_mode(), "skip in FIPS mode")
     def test_clinic_signature(self):
-        for constructor in self.hash_constructors:
-            with self.subTest(constructor.__name__):
-                constructor(b'')
-                constructor(data=b'')
-                with self.assertWarnsRegex(DeprecationWarning,
-                                           DEPRECATED_STRING_PARAMETER):
-                    constructor(string=b'')
+        for constructor in self.clinic_constructors:
+            with self.subTest(constructor=constructor):
+                expected = constructor(b'abc')
+                size = (16,) if expected.name in self.shakes else ()
+                self.assertEqual(constructor(data=b'abc').digest(*size),
+                                 expected.digest(*size))
+                message = (SHA3_DEPRECATED_STRING_PARAMETER
+                           if type(expected).__module__ == '_sha3'
+                           else DEPRECATED_STRING_PARAMETER)
+                with self.assertWarnsRegex(DeprecationWarning, message):
+                    actual = constructor(string=b'abc')
+                self.assertEqual(actual.digest(*size), expected.digest(*size))
 
-            digest_name = constructor(b'').name
-            with self.subTest(digest_name):
-                hashlib.new(digest_name, b'')
-                hashlib.new(digest_name, data=b'')
-                with self.assertWarnsRegex(DeprecationWarning,
-                                           DEPRECATED_STRING_PARAMETER):
-                    hashlib.new(digest_name, string=b'')
-                # Make sure that _hashlib contains the constructor
-                # to test when using a combination of libcrypto and
-                # interned hash implementations.
-                if self._hashlib and digest_name in self._hashlib._constructors:
-                    self._hashlib.new(digest_name, b'')
-                    self._hashlib.new(digest_name, data=b'')
-                    with self.assertWarnsRegex(DeprecationWarning,
-                                               DEPRECATED_STRING_PARAMETER):
-                        self._hashlib.new(digest_name, string=b'')
+    @unittest.skipIf(get_fips_mode(), "skip in FIPS mode")
+    def test_clinic_signature_defaults(self):
+        for constructor in self.clinic_constructors:
+            # The Python wrappers exercise hashlib.new(); the built-in _sha3
+            # types do not expose a signature.
+            if inspect.isfunction(constructor) or constructor.__module__ == '_sha3':
+                continue
+            with self.subTest(constructor=constructor):
+                sig = inspect.signature(constructor)
+                bound = sig.bind(b'abc')
+                bound.apply_defaults()
+                actual = constructor(*bound.args, **bound.kwargs)
+                self.assertNotIn('string', sig.parameters)
+                expected = constructor(b'abc')
+                size = (16,) if expected.name in self.shakes else ()
+                self.assertEqual(actual.digest(*size), expected.digest(*size))
 
     @unittest.skipIf(get_fips_mode(), "skip in FIPS mode")
     def test_clinic_signature_errors(self):
         nomsg = b''
         mymsg = b'msg'
-        conflicting_call = re.escape(
+        sha3_conflict = re.escape(
             "'data' and 'string' are mutually exclusive "
             "and support for 'string' keyword parameter "
             "is slated for removal in a future version."
         )
+        alias_and_position = re.escape("given by name ('string') and position")
+        alias_and_keyword = re.escape("given by name ('string') and name ('data')")
         duplicated_param = re.escape("given by name ('data') and position")
         unexpected_param = re.escape("got an unexpected keyword argument '_'")
         for args, kwds, errmsg in [
@@ -351,22 +370,18 @@ class HashLibTestCase(unittest.TestCase):
             ((nomsg,), dict(_=None), unexpected_param),
             ((mymsg,), dict(_=None), unexpected_param),
             # Reject conflicting arguments.
-            [(nomsg,), dict(string=nomsg), conflicting_call],
-            [(mymsg,), dict(string=nomsg), conflicting_call],
-            [(), dict(data=nomsg, string=nomsg), conflicting_call],
+            [(nomsg,), dict(string=nomsg), alias_and_position],
+            [(mymsg,), dict(string=nomsg), alias_and_position],
+            [(), dict(data=nomsg, string=nomsg), alias_and_keyword],
         ]:
-            for constructor in self.hash_constructors:
-                digest_name = constructor(b'').name
-                with self.subTest(constructor.__name__, args=args, kwds=kwds):
-                    with self.assertRaisesRegex(TypeError, errmsg):
+            for constructor in self.clinic_constructors:
+                expected = errmsg
+                if errmsg in (alias_and_position, alias_and_keyword):
+                    if type(constructor()).__module__ == '_sha3':
+                        expected = sha3_conflict
+                with self.subTest(constructor=constructor, args=args, kwds=kwds):
+                    with self.assertRaisesRegex(TypeError, expected):
                         constructor(*args, **kwds)
-                with self.subTest(digest_name, args=args, kwds=kwds):
-                    with self.assertRaisesRegex(TypeError, errmsg):
-                        hashlib.new(digest_name, *args, **kwds)
-                    if (self._hashlib and
-                            digest_name in self._hashlib._constructors):
-                        with self.assertRaisesRegex(TypeError, errmsg):
-                            self._hashlib.new(digest_name, *args, **kwds)
 
     def test_unknown_hash(self):
         self.assertRaises(ValueError, hashlib.new, 'spam spam spam spam spam')

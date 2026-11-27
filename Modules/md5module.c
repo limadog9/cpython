@@ -264,31 +264,25 @@ _md5.md5
     data: object(c_default="NULL") = b''
     *
     usedforsecurity: bool = True
-    string as string_obj: object(c_default="NULL") = None
+    [until 3.19] string as data: object = None
 
 Return a new MD5 hash object; optionally initialized with a string.
 [clinic start generated code]*/
 
 static PyObject *
-_md5_md5_impl(PyObject *module, PyObject *data, int usedforsecurity,
-              PyObject *string_obj)
-/*[clinic end generated code: output=d45e187d3d16f3a8 input=7ea5c5366dbb44bf]*/
+_md5_md5_impl(PyObject *module, PyObject *data, int usedforsecurity)
+/*[clinic end generated code: output=a6c5b83ba45116c5 input=b530badc59d9df34]*/
 {
-    PyObject *string;
-    if (_Py_hashlib_data_argument(&string, data, string_obj) < 0) {
-        return NULL;
-    }
-
     MD5object *new;
     Py_buffer buf;
 
-    if (string) {
-        GET_BUFFER_VIEW_OR_ERROUT(string, &buf);
+    if (data) {
+        GET_BUFFER_VIEW_OR_ERROUT(data, &buf);
     }
 
     MD5State *st = md5_get_state(module);
     if ((new = newMD5object(st)) == NULL) {
-        if (string) {
+        if (data) {
             PyBuffer_Release(&buf);
         }
         return NULL;
@@ -297,13 +291,13 @@ _md5_md5_impl(PyObject *module, PyObject *data, int usedforsecurity,
     new->hash_state = Hacl_Hash_MD5_malloc();
     if (new->hash_state == NULL) {
         Py_DECREF(new);
-        if (string) {
+        if (data) {
             PyBuffer_Release(&buf);
         }
         return PyErr_NoMemory();
     }
 
-    if (string) {
+    if (data) {
         /* Do not use self->mutex here as this is the constructor
          * where it is not yet possible to have concurrent access. */
         HASHLIB_EXTERNAL_INSTRUCTIONS_UNLOCKED(

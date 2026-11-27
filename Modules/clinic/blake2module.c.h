@@ -13,18 +13,28 @@ PyDoc_STRVAR(py_blake2b_new__doc__,
 "blake2b(data=b\'\', *, digest_size=_blake2.blake2b.MAX_DIGEST_SIZE,\n"
 "        key=b\'\', salt=b\'\', person=b\'\', fanout=1, depth=1, leaf_size=0,\n"
 "        node_offset=0, node_depth=0, inner_size=0, last_node=False,\n"
-"        usedforsecurity=True, string=None)\n"
+"        usedforsecurity=True)\n"
 "--\n"
 "\n"
 "Return a new BLAKE2b hash object.");
 
 static PyObject *
-py_blake2b_new_impl(PyTypeObject *type, PyObject *data_obj, int digest_size,
+py_blake2b_new_impl(PyTypeObject *type, PyObject *data, int digest_size,
                     Py_buffer *key, Py_buffer *salt, Py_buffer *person,
                     int fanout, int depth, unsigned long leaf_size,
                     unsigned long long node_offset, int node_depth,
-                    int inner_size, int last_node, int usedforsecurity,
-                    PyObject *string);
+                    int inner_size, int last_node, int usedforsecurity);
+
+// Emit compiler warnings when we get to Python 3.19.
+#if PY_VERSION_HEX >= 0x031300C0
+#  error "Update the clinic input of '_blake2.blake2b.__new__'."
+#elif PY_VERSION_HEX >= 0x031300A0
+#  ifdef _MSC_VER
+#    pragma message ("Update the clinic input of '_blake2.blake2b.__new__'.")
+#  else
+#    warning "Update the clinic input of '_blake2.blake2b.__new__'."
+#  endif
+#endif
 
 static PyObject *
 py_blake2b_new(PyTypeObject *type, PyObject *args, PyObject *kwargs)
@@ -61,7 +71,7 @@ py_blake2b_new(PyTypeObject *type, PyObject *args, PyObject *kwargs)
     PyObject * const *fastargs;
     Py_ssize_t nargs = PyTuple_GET_SIZE(args);
     Py_ssize_t noptargs = nargs + (kwargs ? PyDict_GET_SIZE(kwargs) : 0) - 0;
-    PyObject *data_obj = NULL;
+    PyObject *data = NULL;
     int digest_size = HACL_HASH_BLAKE2B_OUT_BYTES;
     Py_buffer key = {.buf = "", .obj = NULL, .len = 0};
     Py_buffer salt = {.buf = "", .obj = NULL, .len = 0};
@@ -74,7 +84,6 @@ py_blake2b_new(PyTypeObject *type, PyObject *args, PyObject *kwargs)
     int inner_size = 0;
     int last_node = 0;
     int usedforsecurity = 1;
-    PyObject *string = NULL;
 
     fastargs = _PyArg_UnpackKeywords(_PyTuple_CAST(args)->ob_item, nargs, kwargs, NULL, &_parser,
             /*minpos*/ 0, /*maxpos*/ 1, /*minkw*/ 0, /*varpos*/ 0, argsbuf);
@@ -85,7 +94,7 @@ py_blake2b_new(PyTypeObject *type, PyObject *args, PyObject *kwargs)
         goto skip_optional_pos;
     }
     if (fastargs[0]) {
-        data_obj = fastargs[0];
+        data = fastargs[0];
         if (!--noptargs) {
             goto skip_optional_pos;
         }
@@ -197,9 +206,22 @@ skip_optional_pos:
             goto skip_optional_kwonly;
         }
     }
-    string = fastargs[13];
+    if (fastargs[0]) {
+        PyErr_Format(PyExc_TypeError,
+                "argument for __new__() given by "
+                "name ('string') and %s", 0 < nargs ? "position (1)" : "name ('data')");
+        goto exit;
+    }
+    if (PyErr_WarnEx(PyExc_DeprecationWarning,
+            "Passing the argument 'string' to _blake2.blake2b() is "
+            "deprecated. Use 'data' instead. It will be removed in Python "
+            "3.19.", 1))
+    {
+        goto exit;
+    }
+    data = fastargs[13];
 skip_optional_kwonly:
-    return_value = py_blake2b_new_impl(type, data_obj, digest_size, &key, &salt, &person, fanout, depth, leaf_size, node_offset, node_depth, inner_size, last_node, usedforsecurity, string);
+    return_value = py_blake2b_new_impl(type, data, digest_size, &key, &salt, &person, fanout, depth, leaf_size, node_offset, node_depth, inner_size, last_node, usedforsecurity);
 
 exit:
     /* Cleanup for key */
@@ -222,18 +244,28 @@ PyDoc_STRVAR(py_blake2s_new__doc__,
 "blake2s(data=b\'\', *, digest_size=_blake2.blake2s.MAX_DIGEST_SIZE,\n"
 "        key=b\'\', salt=b\'\', person=b\'\', fanout=1, depth=1, leaf_size=0,\n"
 "        node_offset=0, node_depth=0, inner_size=0, last_node=False,\n"
-"        usedforsecurity=True, string=None)\n"
+"        usedforsecurity=True)\n"
 "--\n"
 "\n"
 "Return a new BLAKE2s hash object.");
 
 static PyObject *
-py_blake2s_new_impl(PyTypeObject *type, PyObject *data_obj, int digest_size,
+py_blake2s_new_impl(PyTypeObject *type, PyObject *data, int digest_size,
                     Py_buffer *key, Py_buffer *salt, Py_buffer *person,
                     int fanout, int depth, unsigned long leaf_size,
                     unsigned long long node_offset, int node_depth,
-                    int inner_size, int last_node, int usedforsecurity,
-                    PyObject *string);
+                    int inner_size, int last_node, int usedforsecurity);
+
+// Emit compiler warnings when we get to Python 3.19.
+#if PY_VERSION_HEX >= 0x031300C0
+#  error "Update the clinic input of '_blake2.blake2s.__new__'."
+#elif PY_VERSION_HEX >= 0x031300A0
+#  ifdef _MSC_VER
+#    pragma message ("Update the clinic input of '_blake2.blake2s.__new__'.")
+#  else
+#    warning "Update the clinic input of '_blake2.blake2s.__new__'."
+#  endif
+#endif
 
 static PyObject *
 py_blake2s_new(PyTypeObject *type, PyObject *args, PyObject *kwargs)
@@ -270,7 +302,7 @@ py_blake2s_new(PyTypeObject *type, PyObject *args, PyObject *kwargs)
     PyObject * const *fastargs;
     Py_ssize_t nargs = PyTuple_GET_SIZE(args);
     Py_ssize_t noptargs = nargs + (kwargs ? PyDict_GET_SIZE(kwargs) : 0) - 0;
-    PyObject *data_obj = NULL;
+    PyObject *data = NULL;
     int digest_size = HACL_HASH_BLAKE2S_OUT_BYTES;
     Py_buffer key = {.buf = "", .obj = NULL, .len = 0};
     Py_buffer salt = {.buf = "", .obj = NULL, .len = 0};
@@ -283,7 +315,6 @@ py_blake2s_new(PyTypeObject *type, PyObject *args, PyObject *kwargs)
     int inner_size = 0;
     int last_node = 0;
     int usedforsecurity = 1;
-    PyObject *string = NULL;
 
     fastargs = _PyArg_UnpackKeywords(_PyTuple_CAST(args)->ob_item, nargs, kwargs, NULL, &_parser,
             /*minpos*/ 0, /*maxpos*/ 1, /*minkw*/ 0, /*varpos*/ 0, argsbuf);
@@ -294,7 +325,7 @@ py_blake2s_new(PyTypeObject *type, PyObject *args, PyObject *kwargs)
         goto skip_optional_pos;
     }
     if (fastargs[0]) {
-        data_obj = fastargs[0];
+        data = fastargs[0];
         if (!--noptargs) {
             goto skip_optional_pos;
         }
@@ -406,9 +437,22 @@ skip_optional_pos:
             goto skip_optional_kwonly;
         }
     }
-    string = fastargs[13];
+    if (fastargs[0]) {
+        PyErr_Format(PyExc_TypeError,
+                "argument for __new__() given by "
+                "name ('string') and %s", 0 < nargs ? "position (1)" : "name ('data')");
+        goto exit;
+    }
+    if (PyErr_WarnEx(PyExc_DeprecationWarning,
+            "Passing the argument 'string' to _blake2.blake2s() is "
+            "deprecated. Use 'data' instead. It will be removed in Python "
+            "3.19.", 1))
+    {
+        goto exit;
+    }
+    data = fastargs[13];
 skip_optional_kwonly:
-    return_value = py_blake2s_new_impl(type, data_obj, digest_size, &key, &salt, &person, fanout, depth, leaf_size, node_offset, node_depth, inner_size, last_node, usedforsecurity, string);
+    return_value = py_blake2s_new_impl(type, data, digest_size, &key, &salt, &person, fanout, depth, leaf_size, node_offset, node_depth, inner_size, last_node, usedforsecurity);
 
 exit:
     /* Cleanup for key */
@@ -506,4 +550,4 @@ _blake2_blake2b_hexdigest(PyObject *self, PyObject *Py_UNUSED(ignored))
 {
     return _blake2_blake2b_hexdigest_impl((Blake2Object *)self);
 }
-/*[clinic end generated code: output=5f76c18211cd7f8f input=a9049054013a1b77]*/
+/*[clinic end generated code: output=b6260a1b42fcf8b1 input=a9049054013a1b77]*/
